@@ -15,7 +15,7 @@ const FormSchema = z.object({
 
 const CreateInvoice = FormSchema.omit({id:true,date:true})
 
-async function createInvoice(formdata: FormData){
+export async function createInvoice(formdata: FormData){
     const {customerId,amount,status} = CreateInvoice.parse({
         customerId: formdata.get('customerId'),
         amount: formdata.get('amount'),
@@ -25,11 +25,14 @@ async function createInvoice(formdata: FormData){
     const date = new Date().toISOString().split('T')[0]
 
     await sql`
-        INSERT INTO invoices (customer_id,amount,status.date)
+        INSERT INTO invoices (customer_id,amount,status,date)
         VALUES (${customerId},${amtInCents},${status},${date})
     `
     revalidatePath('/dashboard/invoices')
     redirect('/dashboard/invoices')
 }
 
-export default createInvoice
+export async function deleteInvoice(id: string){
+    await sql`DELETE FROM invoices WHERE id=${id}`
+    revalidatePath('/dashboard/invoices')
+}
